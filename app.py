@@ -885,6 +885,40 @@ def upload_paper():
                     papers = []
 
 
+        if not papers:
+
+            try:
+
+                papers = get_semantic_scholar_papers(
+
+                    arxiv_query,
+
+                    10
+
+                )
+
+            except Exception:
+
+                try:
+
+                    papers = get_openalex_papers(
+
+                        arxiv_query,
+
+                        10
+
+                    )
+
+                except Exception as openalex_error:
+
+                    print(
+                        "OPENALEX PDF SEARCH ERROR:",
+                        str(openalex_error)
+                    )
+
+                    papers = []
+
+
         if papers:
 
             papers = (
