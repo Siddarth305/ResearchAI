@@ -676,20 +676,9 @@ def upload_paper():
 
             arxiv_query,
 
-            30
+            10
 
         )
-
-
-        if not papers:
-
-            papers = get_arxiv_papers(
-
-                "machine learning",
-
-                30
-
-            )
 
 
         if papers:
