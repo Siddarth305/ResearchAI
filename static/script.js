@@ -69,21 +69,30 @@ async function searchPapers() {
             await fetch(url);
 
 
-        const contentType =
-            response.headers.get("content-type") || "";
+        const responseText = await response.text();
 
         let data;
 
-        if (contentType.includes("application/json")) {
+        try {
 
-            data = await response.json();
+            data = JSON.parse(responseText);
 
-        } else {
+        } catch (parseError) {
 
             throw new Error(
                 response.ok
                     ? "The server returned an invalid response."
                     : `Upload failed (HTTP ${response.status}). Please try again.`
+            );
+
+        }
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                `Upload failed (HTTP ${response.status}).`
             );
 
         }
