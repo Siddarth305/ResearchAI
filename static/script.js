@@ -245,8 +245,24 @@ async function uploadPaper() {
             );
 
 
-        const data =
-            await response.json();
+        const contentType =
+            response.headers.get("content-type") || "";
+
+        let data;
+
+        if (contentType.includes("application/json")) {
+
+            data = await response.json();
+
+        } else {
+
+            throw new Error(
+                response.ok
+                    ? "The server returned an invalid response."
+                    : `Upload failed (HTTP ${response.status}). Please try again.`
+            );
+
+        }
 
 
         if (!data.success) {

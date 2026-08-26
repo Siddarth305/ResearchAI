@@ -76,7 +76,7 @@ def get_arxiv_papers(
     }
 
 
-    for attempt in range(3):
+    for attempt in range(2):
 
         try:
 
@@ -91,7 +91,7 @@ def get_arxiv_papers(
                         "ResearchAI/1.0 (research discovery app)"
                 },
 
-                timeout=30
+                timeout=(5, 12)
 
             )
 
@@ -108,7 +108,7 @@ def get_arxiv_papers(
 
                 raise
 
-            if attempt == 2:
+            if attempt == 1:
 
                 raise RuntimeError(
                     "arXiv is temporarily rate-limiting searches. "
@@ -121,7 +121,7 @@ def get_arxiv_papers(
 
             try:
 
-                delay = min(float(retry_after), 10)
+                delay = min(float(retry_after), 3)
 
             except (TypeError, ValueError):
 
