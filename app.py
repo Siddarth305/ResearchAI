@@ -310,7 +310,8 @@ def get_semantic_scholar_papers(
 
 def get_openalex_papers(
     query,
-    max_results=10
+    max_results=10,
+    timeout=(2, 5)
 ):
 
     response = requests.get(
@@ -332,7 +333,7 @@ def get_openalex_papers(
                 "ResearchAI/1.0 (research discovery app)"
         },
 
-        timeout=(3, 8)
+        timeout=timeout
 
     )
 
@@ -831,46 +832,23 @@ def upload_paper():
 
         try:
 
-            papers = get_arxiv_papers(
+            papers = get_openalex_papers(
 
                 arxiv_query,
 
-                10,
-                attempts=1,
-                timeout=(3, 7)
+                5,
+                timeout=(2, 5)
 
             )
 
-        except Exception as error:
+        except Exception as openalex_error:
 
             print(
-                "ARXIV PDF SEARCH ERROR:",
-                str(error)
+                "OPENALEX PDF SEARCH ERROR:",
+                str(openalex_error)
             )
 
             papers = []
-
-
-        if not papers:
-
-            try:
-
-                papers = get_openalex_papers(
-
-                    arxiv_query,
-
-                    5
-
-                )
-
-            except Exception as openalex_error:
-
-                print(
-                    "OPENALEX PDF SEARCH ERROR:",
-                    str(openalex_error)
-                )
-
-                papers = []
 
 
         if papers:
@@ -919,8 +897,7 @@ def upload_paper():
                 ),
 
             "search_warning":
-                "Similar papers are temporarily unavailable because "
-                "arXiv is rate-limiting requests."
+                "Similar papers are temporarily unavailable right now."
                 if not papers
                 else "",
 
