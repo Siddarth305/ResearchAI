@@ -309,6 +309,7 @@ async function uploadPaper() {
 
 
         resultCount.textContent =
+            data.search_warning ||
             `${currentPapers.length} similar papers found`;
 
 

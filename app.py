@@ -686,7 +686,7 @@ def upload_paper():
 
             )
 
-        except (requests.RequestException, RuntimeError) as error:
+        except Exception as error:
 
             print(
                 "ARXIV PDF SEARCH ERROR:",
@@ -740,6 +740,12 @@ def upload_paper():
                 len(
                     papers
                 ),
+
+            "search_warning":
+                "Similar papers are temporarily unavailable because "
+                "arXiv is rate-limiting requests."
+                if not papers
+                else "",
 
             "papers":
                 top_papers,
