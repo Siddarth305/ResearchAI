@@ -39,6 +39,11 @@ SEMANTIC_SCHOLAR_API = (
 )
 
 
+OPENALEX_API = (
+    "https://api.openalex.org/works"
+)
+
+
 def get_arxiv_papers(
     query,
     max_results=30,
@@ -297,6 +302,89 @@ def get_semantic_scholar_papers(
             "categories": entry.get("fieldsOfStudy") or [],
             "paper_url": paper_url,
             "pdf_url": open_access_pdf.get("url")
+
+        })
+
+    return papers
+
+
+def get_openalex_papers(
+    query,
+    max_results=10
+):
+
+    response = requests.get(
+
+        OPENALEX_API,
+
+        params={
+            "search": query,
+            "per-page": max_results,
+            "select": (
+                "id,title,publication_date,authorships,"
+                "abstract_inverted_index,primary_location,"
+                "best_oa_location,concepts"
+            )
+        },
+
+        headers={
+            "User-Agent":
+                "ResearchAI/1.0 (research discovery app)"
+        },
+
+        timeout=(3, 8)
+
+    )
+
+    response.raise_for_status()
+
+    papers = []
+
+    for entry in response.json().get("results", []):
+
+        abstract_index = entry.get(
+            "abstract_inverted_index"
+        ) or {}
+
+        abstract_words = [
+            (position, word)
+            for word, positions in abstract_index.items()
+            for position in positions
+        ]
+
+        abstract = " ".join(
+            word
+            for position, word in sorted(abstract_words)
+        )
+
+        primary_location = entry.get(
+            "primary_location"
+        ) or {}
+
+        best_oa_location = entry.get(
+            "best_oa_location"
+        ) or {}
+
+        papers.append({
+
+            "id": entry.get("id"),
+            "title": (entry.get("title") or "").strip(),
+            "abstract": abstract,
+            "authors": [
+                (author.get("author") or {}).get("display_name", "")
+                for author in entry.get("authorships", [])
+            ],
+            "published": entry.get("publication_date") or "",
+            "updated": "",
+            "categories": [
+                concept.get("display_name", "")
+                for concept in entry.get("concepts", [])[:5]
+            ],
+            "paper_url": (
+                primary_location.get("landing_page_url")
+                or entry.get("id")
+            ),
+            "pdf_url": best_oa_location.get("pdf_url")
 
         })
 
@@ -777,7 +865,24 @@ def upload_paper():
                     str(fallback_error)
                 )
 
-                papers = []
+                try:
+
+                    papers = get_openalex_papers(
+
+                        arxiv_query,
+
+                        10
+
+                    )
+
+                except Exception as openalex_error:
+
+                    print(
+                        "OPENALEX PDF SEARCH ERROR:",
+                        str(openalex_error)
+                    )
+
+                    papers = []
 
 
         if papers:
