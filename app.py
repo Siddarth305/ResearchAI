@@ -36,7 +36,9 @@ ARXIV_API = (
 
 def get_arxiv_papers(
     query,
-    max_results=30
+    max_results=30,
+    attempts=2,
+    timeout=(5, 12)
 ):
 
     """
@@ -76,7 +78,7 @@ def get_arxiv_papers(
     }
 
 
-    for attempt in range(2):
+    for attempt in range(attempts):
 
         try:
 
@@ -91,7 +93,7 @@ def get_arxiv_papers(
                         "ResearchAI/1.0 (research discovery app)"
                 },
 
-                timeout=(5, 12)
+                timeout=timeout
 
             )
 
@@ -108,7 +110,7 @@ def get_arxiv_papers(
 
                 raise
 
-            if attempt == 1:
+            if attempt == attempts - 1:
 
                 raise RuntimeError(
                     "arXiv is temporarily rate-limiting searches. "
@@ -672,13 +674,26 @@ def upload_paper():
         )
 
 
-        papers = get_arxiv_papers(
+        try:
 
-            arxiv_query,
+            papers = get_arxiv_papers(
 
-            10
+                arxiv_query,
 
-        )
+                10,
+                attempts=1,
+                timeout=(3, 7)
+
+            )
+
+        except (requests.RequestException, RuntimeError) as error:
+
+            print(
+                "ARXIV PDF SEARCH ERROR:",
+                str(error)
+            )
+
+            papers = []
 
 
         if papers:
