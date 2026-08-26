@@ -921,12 +921,31 @@ def upload_paper():
         return jsonify({
 
             "success":
-                False,
+                True,
 
-            "message":
-                f"PDF processing failed: {str(e)}"
+            "filename":
+                file.filename,
 
-        }), 500
+            "text_length":
+                0,
+
+            "candidate_papers":
+                0,
+
+            "search_warning":
+                "The PDF was received, but paper recommendations "
+                "are temporarily unavailable.",
+
+            "papers":
+                [],
+
+            "clusters":
+                [],
+
+            "error":
+                str(e)
+
+        })
 
 
 @app.errorhandler(
