@@ -34,6 +34,11 @@ ARXIV_API = (
 )
 
 
+SEMANTIC_SCHOLAR_API = (
+    "https://api.semanticscholar.org/graph/v1/paper/search"
+)
+
+
 def get_arxiv_papers(
     query,
     max_results=30,
@@ -232,6 +237,68 @@ def get_arxiv_papers(
 
         })
 
+
+    return papers
+
+
+def get_semantic_scholar_papers(
+    query,
+    max_results=10
+):
+
+    response = requests.get(
+
+        SEMANTIC_SCHOLAR_API,
+
+        params={
+            "query": query,
+            "limit": max_results,
+            "fields": (
+                "title,abstract,authors,publicationDate,"
+                "externalIds,url,openAccessPdf,fieldsOfStudy"
+            )
+        },
+
+        headers={
+            "User-Agent":
+                "ResearchAI/1.0 (research discovery app)"
+        },
+
+        timeout=(3, 8)
+
+    )
+
+    response.raise_for_status()
+
+    papers = []
+
+    for entry in response.json().get("data", []):
+
+        external_ids = entry.get("externalIds") or {}
+        arxiv_id = external_ids.get("ArXiv")
+        paper_url = entry.get("url")
+
+        if arxiv_id:
+            paper_url = f"https://arxiv.org/abs/{arxiv_id}"
+
+        open_access_pdf = entry.get("openAccessPdf") or {}
+
+        papers.append({
+
+            "id": entry.get("paperId"),
+            "title": (entry.get("title") or "").strip(),
+            "abstract": (entry.get("abstract") or "").strip(),
+            "authors": [
+                author.get("name", "")
+                for author in entry.get("authors", [])
+            ],
+            "published": entry.get("publicationDate") or "",
+            "updated": "",
+            "categories": entry.get("fieldsOfStudy") or [],
+            "paper_url": paper_url,
+            "pdf_url": open_access_pdf.get("url")
+
+        })
 
     return papers
 
@@ -693,7 +760,24 @@ def upload_paper():
                 str(error)
             )
 
-            papers = []
+            try:
+
+                papers = get_semantic_scholar_papers(
+
+                    arxiv_query,
+
+                    10
+
+                )
+
+            except Exception as fallback_error:
+
+                print(
+                    "SEMANTIC SCHOLAR PDF SEARCH ERROR:",
+                    str(fallback_error)
+                )
+
+                papers = []
 
 
         if papers:
