@@ -1,8 +1,7 @@
 Flask
+flask-cors
 requests
-feedparser
 pypdf
-sentence-transformers
 scikit-learn
 numpy
 gunicorn

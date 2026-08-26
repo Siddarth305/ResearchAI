@@ -1,135 +1,320 @@
-from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
 import numpy as np
+import re
 
 
 class ResearchRecommender:
 
     def __init__(self):
+        pass
 
-        print("Loading ML model...")
+    # ==================================================
+    # CLEAN TEXT
+    # ==================================================
 
-        self.model = SentenceTransformer(
-            "all-MiniLM-L6-v2"
+    def _clean_text(self, text):
+
+        if not text:
+            return ""
+
+        text = str(text).lower()
+
+        text = re.sub(
+            r"[^a-z0-9\s-]",
+            " ",
+            text
         )
 
-        print("ML model loaded.")
-
-
-    def create_embedding(self, text):
-
-        """
-        Convert text into a semantic vector.
-        """
-
-        embedding = self.model.encode(
-            [text],
-            convert_to_numpy=True
+        text = re.sub(
+            r"\s+",
+            " ",
+            text
         )
 
-        return embedding
+        return text.strip()
 
 
-    def create_embeddings(self, texts):
+    # ==================================================
+    # PAPER TEXT
+    # ==================================================
 
-        """
-        Convert multiple texts into semantic vectors.
-        """
+    def _paper_text(self, paper):
 
-        return self.model.encode(
-            texts,
-            convert_to_numpy=True,
-            show_progress_bar=False
+        title = paper.get(
+            "title",
+            ""
+        )
+
+        abstract = paper.get(
+            "abstract",
+            ""
+        )
+
+        categories = " ".join(
+            paper.get(
+                "categories",
+                []
+            )
+        )
+
+        # Give title more importance
+        return (
+            f"{title} {title} {title} "
+            f"{abstract} "
+            f"{categories}"
         )
 
 
-    def rank_papers(self, query, papers):
+    # ==================================================
+    # KEYWORD EXTRACTION
+    # ==================================================
 
-        """
-        Rank papers based on semantic similarity
-        to the user's search query.
-        """
+    def _keywords(self, text):
+
+        text = self._clean_text(text)
+
+        words = text.split()
+
+        stop_words = {
+            "this",
+            "that",
+            "with",
+            "from",
+            "using",
+            "used",
+            "into",
+            "their",
+            "there",
+            "these",
+            "those",
+            "which",
+            "where",
+            "when",
+            "what",
+            "will",
+            "would",
+            "could",
+            "should",
+            "have",
+            "has",
+            "been",
+            "were",
+            "was",
+            "are",
+            "and",
+            "the",
+            "for",
+            "not",
+            "but",
+            "also",
+            "than",
+            "then",
+            "such",
+            "based",
+            "paper",
+            "study",
+            "method",
+            "methods",
+            "results",
+            "approach",
+            "proposed",
+            "data"
+        }
+
+        keywords = []
+
+        for word in words:
+
+            if (
+                len(word) >= 4
+                and word not in stop_words
+                and word not in keywords
+            ):
+
+                keywords.append(word)
+
+        return keywords
+
+
+    # ==================================================
+    # KEYWORD OVERLAP
+    # ==================================================
+
+    def _keyword_similarity(
+        self,
+        document_text,
+        paper
+    ):
+
+        document_words = set(
+            self._keywords(
+                document_text
+            )
+        )
+
+        paper_text = self._paper_text(
+            paper
+        )
+
+        paper_words = set(
+            self._keywords(
+                paper_text
+            )
+        )
+
+        if not document_words:
+            return 0.0
+
+        if not paper_words:
+            return 0.0
+
+        common_words = (
+            document_words &
+            paper_words
+        )
+
+        return (
+            len(common_words) /
+            len(document_words)
+        )
+
+
+    # ==================================================
+    # RANK SEARCH PAPERS
+    # ==================================================
+
+    def rank_papers(
+        self,
+        query,
+        papers
+    ):
 
         if not papers:
-
             return []
 
-
-        query_embedding = self.create_embedding(
+        query = self._clean_text(
             query
         )
 
+        documents = [
+            self._paper_text(paper)
+            for paper in papers
+        ]
 
-        paper_texts = []
+        try:
 
+            # WORD TF-IDF
 
-        for paper in papers:
-
-            title = paper.get(
-                "title",
-                ""
+            word_vectorizer = TfidfVectorizer(
+                stop_words="english",
+                max_features=6000,
+                ngram_range=(1, 2),
+                sublinear_tf=True
             )
 
-            abstract = paper.get(
-                "abstract",
-                ""
+            all_text = [
+                query
+            ] + documents
+
+            word_vectors = (
+                word_vectorizer
+                .fit_transform(
+                    all_text
+                )
+            )
+
+            word_scores = cosine_similarity(
+                word_vectors[0:1],
+                word_vectors[1:]
+            )[0]
+
+
+            # CHARACTER TF-IDF
+
+            char_vectorizer = TfidfVectorizer(
+                analyzer="char_wb",
+                ngram_range=(3, 5),
+                max_features=8000,
+                sublinear_tf=True
+            )
+
+            char_vectors = (
+                char_vectorizer
+                .fit_transform(
+                    all_text
+                )
+            )
+
+            char_scores = cosine_similarity(
+                char_vectors[0:1],
+                char_vectors[1:]
+            )[0]
+
+
+        except Exception as error:
+
+            print(
+                "SEARCH TF-IDF ERROR:",
+                error
+            )
+
+            word_scores = np.zeros(
+                len(papers)
+            )
+
+            char_scores = np.zeros(
+                len(papers)
             )
 
 
-            combined_text = (
-                f"{title}. {abstract}"
-            )
-
-
-            paper_texts.append(
-                combined_text
-            )
-
-
-        paper_embeddings = self.create_embeddings(
-            paper_texts
-        )
-
-
-        similarities = cosine_similarity(
-
-            query_embedding,
-
-            paper_embeddings
-
-        )[0]
-
-
-        for paper, similarity in zip(
-            papers,
-            similarities
+        for index, paper in enumerate(
+            papers
         ):
 
-            paper["similarity_score"] = round(
+            word_score = float(
+                word_scores[index]
+            )
 
-                float(similarity) * 100,
+            char_score = float(
+                char_scores[index]
+            )
 
+            # Combine both scores
+
+            final_score = (
+                word_score * 0.75
+                +
+                char_score * 0.25
+            )
+
+            paper[
+                "similarity_score"
+            ] = round(
+                min(
+                    final_score * 100,
+                    100
+                ),
                 2
-
             )
 
 
         papers.sort(
-
-            key=lambda x:
-                x.get(
+            key=lambda paper:
+                paper.get(
                     "similarity_score",
                     0
                 ),
-
             reverse=True
-
         )
-
 
         return papers
 
+
+    # ==================================================
+    # RANK PAPERS AGAINST PDF
+    # ==================================================
 
     def rank_papers_by_document(
         self,
@@ -137,311 +322,334 @@ class ResearchRecommender:
         papers
     ):
 
-        """
-        Rank papers based on similarity
-        to an uploaded research paper.
-        """
-
         if not papers:
-
             return []
 
-
-        document_embedding = self.create_embedding(
-
-            document_text
-
+        document_text = (
+            self._clean_text(
+                document_text
+            )
         )
 
+        documents = [
+            self._paper_text(paper)
+            for paper in papers
+        ]
 
-        paper_texts = []
+        try:
 
+            # ------------------------------------------
+            # WORD TF-IDF
+            # ------------------------------------------
 
-        for paper in papers:
-
-            title = paper.get(
-                "title",
-                ""
+            word_vectorizer = TfidfVectorizer(
+                stop_words="english",
+                max_features=10000,
+                ngram_range=(1, 2),
+                sublinear_tf=True
             )
 
-            abstract = paper.get(
-                "abstract",
-                ""
+            all_text = [
+                document_text
+            ] + documents
+
+            word_vectors = (
+                word_vectorizer
+                .fit_transform(
+                    all_text
+                )
+            )
+
+            word_scores = cosine_similarity(
+                word_vectors[0:1],
+                word_vectors[1:]
+            )[0]
+
+
+            # ------------------------------------------
+            # CHARACTER TF-IDF
+            # ------------------------------------------
+
+            char_vectorizer = TfidfVectorizer(
+                analyzer="char_wb",
+                ngram_range=(3, 5),
+                max_features=12000,
+                sublinear_tf=True
+            )
+
+            char_vectors = (
+                char_vectorizer
+                .fit_transform(
+                    all_text
+                )
+            )
+
+            char_scores = cosine_similarity(
+                char_vectors[0:1],
+                char_vectors[1:]
+            )[0]
+
+
+        except Exception as error:
+
+            print(
+                "PDF TF-IDF ERROR:",
+                error
+            )
+
+            word_scores = np.zeros(
+                len(papers)
+            )
+
+            char_scores = np.zeros(
+                len(papers)
             )
 
 
-            combined_text = (
-                f"{title}. {abstract}"
-            )
-
-
-            paper_texts.append(
-                combined_text
-            )
-
-
-        paper_embeddings = self.create_embeddings(
-
-            paper_texts
-
-        )
-
-
-        similarities = cosine_similarity(
-
-            document_embedding,
-
-            paper_embeddings
-
-        )[0]
-
-
-        for paper, similarity in zip(
-
-            papers,
-
-            similarities
-
+        for index, paper in enumerate(
+            papers
         ):
 
-            paper["similarity_score"] = round(
+            word_score = float(
+                word_scores[index]
+            )
 
-                float(similarity) * 100,
+            char_score = float(
+                char_scores[index]
+            )
 
+
+            # ------------------------------------------
+            # KEYWORD OVERLAP
+            # ------------------------------------------
+
+            keyword_score = (
+                self._keyword_similarity(
+                    document_text,
+                    paper
+                )
+            )
+
+
+            # ------------------------------------------
+            # HYBRID SCORE
+            # ------------------------------------------
+
+            final_score = (
+
+                word_score * 0.60
+
+                +
+
+                char_score * 0.20
+
+                +
+
+                keyword_score * 0.20
+
+            )
+
+
+            # Prevent tiny values from
+            # displaying as 0
+
+            if (
+                final_score > 0
+                and final_score < 0.01
+            ):
+
+                final_score = 0.01
+
+
+            paper[
+                "similarity_score"
+            ] = round(
+                min(
+                    final_score * 100,
+                    100
+                ),
                 2
-
             )
 
 
         papers.sort(
-
-            key=lambda x:
-                x.get(
+            key=lambda paper:
+                paper.get(
                     "similarity_score",
                     0
                 ),
-
             reverse=True
-
         )
 
 
         return papers
 
 
+    # ==================================================
+    # CLUSTER PAPERS
+    # ==================================================
+
     def cluster_papers(
         self,
         papers,
-        number_of_clusters=4
+        n_clusters=4
     ):
 
-        """
-        Group papers into semantic research topics
-        using K-Means clustering.
-        """
-
         if not papers:
-
             return []
 
 
-        # We need at least two papers
         if len(papers) < 2:
 
-            return []
-
-
-        paper_texts = []
-
-
-        for paper in papers:
-
-            title = paper.get(
-                "title",
-                ""
-            )
-
-            abstract = paper.get(
-                "abstract",
-                ""
-            )
-
-
-            paper_texts.append(
-
-                f"{title}. {abstract}"
-
-            )
-
-
-        embeddings = self.create_embeddings(
-
-            paper_texts
-
-        )
-
-
-        # Never create more clusters than papers
-
-        number_of_clusters = min(
-
-            number_of_clusters,
-
-            len(papers)
-
-        )
-
-
-        kmeans = KMeans(
-
-            n_clusters=number_of_clusters,
-
-            random_state=42,
-
-            n_init=10
-
-        )
-
-
-        labels = kmeans.fit_predict(
-            embeddings
-        )
-
-
-        # Add cluster information to papers
-
-        for paper, label in zip(
-            papers,
-            labels
-        ):
-
-            paper["cluster"] = int(
-                label
-            )
-
-
-        clusters = []
-
-
-        for cluster_id in range(
-            number_of_clusters
-        ):
-
-            cluster_papers = [
-
-                paper
-
-                for paper in papers
-
-                if paper["cluster"]
-                == cluster_id
-
+            return [
+                {
+                    "name": "Research",
+                    "size": len(papers)
+                }
             ]
 
 
-            if not cluster_papers:
+        documents = [
+            self._paper_text(paper)
+            for paper in papers
+        ]
 
-                continue
 
+        try:
 
-            # Calculate cluster size
-
-            cluster_size = len(
-                cluster_papers
+            vectorizer = TfidfVectorizer(
+                stop_words="english",
+                max_features=3000,
+                ngram_range=(1, 2),
+                sublinear_tf=True
             )
 
 
-            # Find representative paper
-            # closest to the cluster center
-
-            cluster_indices = [
-
-                index
-
-                for index, paper in enumerate(
-                    papers
+            vectors = (
+                vectorizer
+                .fit_transform(
+                    documents
                 )
-
-                if paper["cluster"]
-                == cluster_id
-
-            ]
-
-
-            center = kmeans.cluster_centers_[
-
-                cluster_id
-
-            ]
-
-
-            cluster_embeddings = embeddings[
-                cluster_indices
-            ]
-
-
-            distances = np.linalg.norm(
-
-                cluster_embeddings - center,
-
-                axis=1
-
             )
 
 
-            representative_index = (
+            actual_clusters = min(
+                n_clusters,
+                len(papers)
+            )
 
-                cluster_indices[
-                    int(
-                        np.argmin(
-                            distances
-                        )
-                    )
+
+            if actual_clusters < 2:
+
+                return [
+                    {
+                        "name": "Research",
+                        "size": len(papers)
+                    }
                 ]
 
+
+            model = KMeans(
+                n_clusters=actual_clusters,
+                random_state=42,
+                n_init=10
             )
 
 
-            representative_paper = papers[
-                representative_index
-            ]
+            labels = model.fit_predict(
+                vectors
+            )
 
 
-            # Use representative paper title
-            # as the initial cluster name
+            feature_names = (
+                vectorizer
+                .get_feature_names_out()
+            )
 
-            cluster_name = (
-                representative_paper
-                .get(
-                    "title",
-                    f"Research Group {cluster_id + 1}"
+
+            clusters = []
+
+
+            for cluster_id in range(
+                actual_clusters
+            ):
+
+                indexes = [
+                    i
+                    for i, label
+                    in enumerate(labels)
+                    if label == cluster_id
+                ]
+
+
+                if not indexes:
+                    continue
+
+
+                center = (
+                    model
+                    .cluster_centers_[
+                        cluster_id
+                    ]
                 )
+
+
+                top_indices = (
+                    center.argsort()[
+                        ::-1
+                    ][:5]
+                )
+
+
+                keywords = [
+                    feature_names[index]
+                    for index in top_indices
+                ]
+
+
+                if keywords:
+
+                    name = " · ".join(
+                        keywords[:3]
+                    )
+
+                else:
+
+                    name = (
+                        f"Research Cluster "
+                        f"{cluster_id + 1}"
+                    )
+
+
+                clusters.append(
+                    {
+                        "name": name,
+                        "size": len(indexes)
+                    }
+                )
+
+
+            clusters.sort(
+                key=lambda cluster:
+                    cluster["size"],
+                reverse=True
             )
 
 
-            clusters.append({
-
-                "id": cluster_id,
-
-                "name": cluster_name,
-
-                "size": cluster_size,
-
-                "papers": cluster_papers
-
-            })
+            return clusters
 
 
-        # Largest groups first
+        except Exception as error:
 
-        clusters.sort(
-
-            key=lambda x:
-                x["size"],
-
-            reverse=True
-
-        )
+            print(
+                "CLUSTERING ERROR:",
+                error
+            )
 
 
-        return clusters
+            return [
+                {
+                    "name": "Research",
+                    "size": len(papers)
+                }
+            ]   

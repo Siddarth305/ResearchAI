@@ -7,6 +7,7 @@ let savedPapers = JSON.parse(
 let currentPapers = [];
 
 
+
 // ======================================================
 // SEARCH PAPERS
 // ======================================================
@@ -706,6 +707,38 @@ function displayPapers(
                     : 0;
 
 
+            // ==========================================
+            // RELEVANCE SCORE OUT OF 10
+            // ==========================================
+
+            const maxSimilarity = Math.max(
+                ...papers.map(
+                    p =>
+                        typeof p.similarity_score === "number"
+                            ? p.similarity_score
+                            : 0
+                ),
+                0.01
+            );
+
+
+            const scoreOutOf10 = Math.min(
+                10,
+                (similarity / maxSimilarity) * 10
+            );
+
+
+            const scoreDisplay =
+                scoreOutOf10.toFixed(1);
+
+
+            const scoreWidth =
+                Math.min(
+                    100,
+                    scoreOutOf10 * 10
+                );
+
+
             const isSaved =
                 savedPapers.some(
                     saved =>
@@ -760,11 +793,11 @@ function displayPapers(
                     <div class="ai-score-header">
 
                         <span>
-                            SEMANTIC MATCH
+                            RELEVANCE MATCH
                         </span>
 
                         <strong>
-                            ${similarity}%
+                            ${scoreDisplay}/10
                         </strong>
 
                     </div>
@@ -775,11 +808,7 @@ function displayPapers(
                         <div
                             class="score-fill"
                             style="
-                                width:
-                                ${Math.min(
-                                    similarity,
-                                    100
-                                )}%
+                                width: ${scoreWidth}%
                             "
                         ></div>
 
@@ -1167,6 +1196,7 @@ function toggleTheme() {
     updateThemeButton();
 
 }
+
 
 function updateThemeButton() {
 
