@@ -848,75 +848,29 @@ def upload_paper():
                 str(error)
             )
 
-            try:
-
-                papers = get_semantic_scholar_papers(
-
-                    arxiv_query,
-
-                    10
-
-                )
-
-            except Exception as fallback_error:
-
-                print(
-                    "SEMANTIC SCHOLAR PDF SEARCH ERROR:",
-                    str(fallback_error)
-                )
-
-                try:
-
-                    papers = get_openalex_papers(
-
-                        arxiv_query,
-
-                        10
-
-                    )
-
-                except Exception as openalex_error:
-
-                    print(
-                        "OPENALEX PDF SEARCH ERROR:",
-                        str(openalex_error)
-                    )
-
-                    papers = []
+            papers = []
 
 
         if not papers:
 
             try:
 
-                papers = get_semantic_scholar_papers(
+                papers = get_openalex_papers(
 
                     arxiv_query,
 
-                    10
+                    5
 
                 )
 
-            except Exception:
+            except Exception as openalex_error:
 
-                try:
+                print(
+                    "OPENALEX PDF SEARCH ERROR:",
+                    str(openalex_error)
+                )
 
-                    papers = get_openalex_papers(
-
-                        arxiv_query,
-
-                        10
-
-                    )
-
-                except Exception as openalex_error:
-
-                    print(
-                        "OPENALEX PDF SEARCH ERROR:",
-                        str(openalex_error)
-                    )
-
-                    papers = []
+                papers = []
 
 
         if papers:
