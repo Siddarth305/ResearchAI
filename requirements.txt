@@ -1,6 +1,7 @@
 Flask
 flask-cors
 requests
+feedparser
 pypdf
 scikit-learn
 numpy
