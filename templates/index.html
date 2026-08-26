@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="ResearchAI — AI-powered research discovery and paper analysis."
+    >
+
+    <title>ResearchAI — AI Research Intelligence</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <link
+        rel="icon"
+        type="image/svg+xml"
+        href="{{ url_for('static', filename='favicon.svg') }}"
+    >
+
+</head>
+
+
+<body>
+
+<!-- Background effects -->
+
+<div class="ambient ambient-one"></div>
+<div class="ambient ambient-two"></div>
+
+
+<!-- NAVIGATION -->
+
+<header class="navbar">
+
+    <a
+        href="/"
+        class="brand"
+    >
+
+        <div class="brand-mark">
+            R
+        </div>
+
+        <span>
+            Research<span>AI</span>
+        </span>
+
+    </a>
+
+
+    <nav class="nav-links">
+
+        <a href="#search">
+            Explore
+        </a>
+
+        <a href="#upload">
+            Analyze
+        </a>
+
+        <a href="#library">
+            Library
+        </a>
+
+    </nav>
+
+
+    <div class="nav-actions">
+
+        <button
+            class="nav-icon"
+            onclick="toggleTheme()"
+            title="Toggle theme"
+        >
+            ◐
+        </button>
+
+        <a
+            href="#search"
+            class="nav-cta"
+        >
+            Start Research
+        </a>
+
+    </div>
+
+</header>
+
+
+
+<main>
+
+
+<!-- HERO -->
+
+<section
+    class="hero"
+    id="search"
+>
+
+    <div class="hero-badge">
+
+        <span class="status-dot"></span>
+
+        AI RESEARCH INTELLIGENCE
+
+    </div>
+
+
+    <h1>
+
+        Your research,
+        <span class="gradient-text">
+            augmented by AI.
+        </span>
+
+    </h1>
+
+
+    <p class="hero-description">
+
+        Discover relevant research, analyze papers,
+        and uncover hidden connections with semantic AI.
+
+    </p>
+
+
+    <!-- AI SEARCH -->
+
+    <div class="ai-search">
+
+        <div class="search-symbol">
+            ✦
+        </div>
+
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Ask ResearchAI about a topic..."
+            autocomplete="off"
+        >
+
+
+        <button
+            onclick="searchPapers()"
+            class="search-button"
+        >
+
+            <span>
+                Search
+            </span>
+
+            <span class="search-arrow">
+                →
+            </span>
+
+        </button>
+
+    </div>
+
+
+    <div class="search-hints">
+
+        <span>Try:</span>
+
+        <button onclick="setSearch('transformer models for NLP')">
+            transformer models for NLP
+        </button>
+
+        <button onclick="setSearch('fake news detection')">
+            fake news detection
+        </button>
+
+        <button onclick="setSearch('computer vision')">
+            computer vision
+        </button>
+
+    </div>
+
+
+    <!-- FEATURE STRIP -->
+
+    <div class="feature-strip">
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+                ✦
+            </div>
+
+            <div>
+
+                <strong>
+                    Semantic Search
+                </strong>
+
+                <span>
+                    Meaning-aware discovery
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+                ◇
+            </div>
+
+            <div>
+
+                <strong>
+                    PDF Analysis
+                </strong>
+
+                <span>
+                    Find similar research
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="feature-item">
+
+            <div class="feature-icon">
+                ◎
+            </div>
+
+            <div>
+
+                <strong>
+                    Topic Intelligence
+                </strong>
+
+                <span>
+                    Discover research clusters
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- DASHBOARD -->
+
+<section class="dashboard-section">
+
+
+    <!-- STATS -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+
+            <span class="stat-label">
+                ENGINE
+            </span>
+
+            <strong>
+                Semantic AI
+            </strong>
+
+            <span class="stat-description">
+                Sentence Transformers
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span class="stat-label">
+                SOURCE
+            </span>
+
+            <strong>
+                arXiv
+            </strong>
+
+            <span class="stat-description">
+                Research database
+            </span>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <span class="stat-label">
+                INTELLIGENCE
+            </span>
+
+            <strong>
+                K-Means
+            </strong>
+
+            <span class="stat-description">
+                Topic clustering
+            </span>
+
+        </div>
+
+
+        <div class="stat-card accent-card">
+
+            <span class="stat-label">
+                WORKSPACE
+            </span>
+
+            <strong>
+                Your Library
+            </strong>
+
+            <span class="stat-description">
+                Save & revisit research
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- RESEARCH TOPICS -->
+
+    <div
+        class="topics-panel"
+        id="topics"
+    >
+
+        <div class="section-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    RESEARCH INTELLIGENCE
+                </div>
+
+                <h2>
+                    Research Map
+                </h2>
+
+                <p>
+                    AI-detected semantic groups from your research.
+                </p>
+
+            </div>
+
+
+            <div class="live-indicator">
+
+                <span></span>
+
+                LIVE ANALYSIS
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="clustersContainer"
+            class="clusters-container"
+        ></div>
+
+    </div>
+
+
+
+    <!-- FILTERS -->
+
+    <div class="results-toolbar">
+
+        <div>
+
+            <div class="eyebrow">
+                DISCOVERY
+            </div>
+
+            <h2>
+                Top Matches
+            </h2>
+
+        </div>
+
+
+        <div class="filters">
+
+            <select id="sortFilter">
+
+                <option value="relevance">
+                    AI Relevance
+                </option>
+
+                <option value="newest">
+                    Newest
+                </option>
+
+                <option value="oldest">
+                    Oldest
+                </option>
+
+            </select>
+
+
+            <select id="categoryFilter">
+
+                <option value="all">
+                    All Categories
+                </option>
+
+                <option value="cs.LG">
+                    Machine Learning
+                </option>
+
+                <option value="cs.AI">
+                    Artificial Intelligence
+                </option>
+
+                <option value="cs.CL">
+                    Natural Language Processing
+                </option>
+
+                <option value="cs.CV">
+                    Computer Vision
+                </option>
+
+                <option value="cs.IR">
+                    Information Retrieval
+                </option>
+
+            </select>
+
+
+            <button
+                onclick="searchPapers()"
+                class="filter-button"
+            >
+                Apply
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <div
+        id="resultCount"
+        class="result-count"
+    ></div>
+
+
+    <div
+        id="loading"
+        class="loading"
+    >
+
+        <div class="loader"></div>
+
+        <span>
+            ResearchAI is analyzing the literature...
+        </span>
+
+    </div>
+
+
+    <div
+        id="error"
+        class="error"
+    ></div>
+
+
+    <div
+        id="papersContainer"
+        class="papers-container"
+    ></div>
+
+
+</section>
+
+
+
+<!-- PDF ANALYSIS -->
+
+<section
+    class="analysis-section"
+    id="upload"
+>
+
+    <div class="analysis-content">
+
+        <div class="eyebrow">
+            PAPER INTELLIGENCE
+        </div>
+
+        <h2>
+            Already have a paper?
+        </h2>
+
+        <p>
+            Upload your research PDF and let ResearchAI
+            find semantically similar papers across arXiv.
+        </p>
+
+
+        <div
+            class="upload-zone"
+            id="uploadZone"
+        >
+
+            <div class="upload-icon">
+                ↑
+            </div>
+
+
+            <h3>
+                Drop your paper here
+            </h3>
+
+
+            <span>
+                or choose a PDF from your computer
+            </span>
+
+
+            <input
+                type="file"
+                id="pdfInput"
+                accept=".pdf"
+            >
+
+
+            <label
+                for="pdfInput"
+                class="choose-file"
+            >
+                Choose PDF
+            </label>
+
+
+            <button
+                onclick="uploadPaper()"
+                class="analyze-button"
+            >
+                Analyze Paper →
+            </button>
+
+
+            <div
+                id="uploadStatus"
+                class="upload-status"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="analysis-visual">
+
+        <div class="scan-card">
+
+            <div class="scan-header">
+
+                <span>
+                    AI ANALYSIS
+                </span>
+
+                <span class="scan-live">
+                    ●
+                </span>
+
+            </div>
+
+
+            <div class="scan-lines">
+
+                <div class="scan-line long"></div>
+
+                <div class="scan-line medium"></div>
+
+                <div class="scan-line short"></div>
+
+                <div class="scan-line long"></div>
+
+                <div class="scan-line medium"></div>
+
+            </div>
+
+
+            <div class="scan-result">
+
+                <span>
+                    Semantic Match
+                </span>
+
+                <strong>
+                    AI
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- LIBRARY -->
+
+<section
+    class="library-section"
+    id="library"
+>
+
+    <div class="section-heading">
+
+        <div>
+
+            <div class="eyebrow">
+                PERSONAL WORKSPACE
+            </div>
+
+            <h2>
+                Research Library
+            </h2>
+
+            <p>
+                Your saved papers, ready when you are.
+            </p>
+
+        </div>
+
+
+        <span
+            id="savedCount"
+            class="saved-count"
+        >
+            0 saved
+        </span>
+
+    </div>
+
+
+    <div
+        id="savedPapersContainer"
+        class="saved-papers-container"
+    ></div>
+
+</section>
+
+
+
+</main>
+
+
+
+<!-- FOOTER -->
+
+<footer class="footer">
+
+    <div class="footer-brand">
+
+        <div class="brand-mark">
+            R
+        </div>
+
+        <span>
+            ResearchAI
+        </span>
+
+    </div>
+
+
+    <span>
+        AI-powered research discovery
+    </span>
+
+
+    <span>
+        Powered by arXiv
+    </span>
+
+</footer>
+
+
+
+<script
+    src="{{ url_for('static', filename='script.js') }}"
+></script>
+
+
+</body>
+
+</html>
