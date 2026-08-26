@@ -8,6 +8,7 @@ from flask import (
 import requests
 import feedparser
 import re
+import time
 
 from pypdf import PdfReader
 from io import BytesIO
@@ -75,18 +76,58 @@ def get_arxiv_papers(
     }
 
 
-    response = requests.get(
+    for attempt in range(3):
 
-        ARXIV_API,
+        try:
 
-        params=params,
+            response = requests.get(
 
-        timeout=30
+                ARXIV_API,
 
-    )
+                params=params,
 
+                headers={
+                    "User-Agent":
+                        "ResearchAI/1.0 (research discovery app)"
+                },
 
-    response.raise_for_status()
+                timeout=30
+
+            )
+
+            response.raise_for_status()
+
+            break
+
+        except requests.HTTPError as error:
+
+            if (
+                error.response is None
+                or error.response.status_code != 429
+            ):
+
+                raise
+
+            if attempt == 2:
+
+                raise RuntimeError(
+                    "arXiv is temporarily rate-limiting searches. "
+                    "Please wait a minute and try again."
+                ) from error
+
+            retry_after = error.response.headers.get(
+                "Retry-After"
+            )
+
+            try:
+
+                delay = min(float(retry_after), 10)
+
+            except (TypeError, ValueError):
+
+                delay = 2 ** attempt
+
+            time.sleep(delay)
 
 
     feed = feedparser.parse(
