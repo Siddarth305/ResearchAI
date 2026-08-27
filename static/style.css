@@ -678,6 +678,8 @@ body::after {
 
     align-items: center;
 
+    justify-content: center;
+
     position: relative;
 
     gap: 16px;
@@ -1993,6 +1995,8 @@ body::after {
             1px solid var(--border);
 
         min-height: 84px;
+
+        justify-content: center;
 
     }
 
