@@ -461,11 +461,9 @@ function displayPapers(
 
                 <div class="paper-title">
 
-                    ${
-                        isSaved
-                            ? `<span class="save-icon">✓</span><span>SAVED</span>`
-                            : `<span class="save-icon">☆</span><span>SAVE PAPER</span>`
-                    }
+                    ${escapeHTML(
+                        paper.title
+                    )}
 
                 </div>
 
@@ -589,8 +587,8 @@ function displayPapers(
 
                         ${
                             isSaved
-                                ? "✓ Saved to library"
-                                : "☆ Save paper"
+                                ? `<span class="save-icon">✓</span><span>SAVED</span>`
+                                : `<span class="save-icon">☆</span><span>SAVE PAPER</span>`
                         }
 
                     </button>
