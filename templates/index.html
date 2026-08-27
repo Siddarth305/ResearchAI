@@ -12,7 +12,7 @@
 
     <meta
         name="description"
-        content="ResearchAI — AI-powered research discovery and paper analysis."
+        content="ResearchAI — AI-powered research discovery and paper recommendations."
     >
 
     <title>ResearchAI — AI Research Intelligence</title>
@@ -20,6 +20,12 @@
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet"
     >
     <link
         rel="icon"
@@ -36,6 +42,15 @@
 
 <div class="ambient ambient-one"></div>
 <div class="ambient ambient-two"></div>
+
+
+<div
+    id="saveFeedback"
+    class="save-feedback"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+></div>
 
 
 <!-- NAVIGATION -->
@@ -62,10 +77,6 @@
 
         <a href="#search">
             Explore
-        </a>
-
-        <a href="#upload">
-            Analyze
         </a>
 
         <a href="#library">
@@ -129,8 +140,8 @@
 
     <p class="hero-description">
 
-        Discover relevant research, analyze papers,
-        and uncover hidden connections with semantic AI.
+        Discover relevant research and uncover hidden
+        connections with semantic AI.
 
     </p>
 

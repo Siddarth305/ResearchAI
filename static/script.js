@@ -575,8 +575,8 @@ function displayPapers(
 
                         ${
                             isSaved
-                                ? "✓ Saved"
-                                : "☆ Save"
+                                ? "✓ Saved to library"
+                                : "☆ Save paper"
                         }
 
                     </button>
@@ -612,9 +612,10 @@ function toggleSavePaper(
         );
 
 
-    if (
-        existingIndex !== -1
-    ) {
+    const willSave = existingIndex === -1;
+
+
+    if (!willSave) {
 
         savedPapers.splice(
             existingIndex,
@@ -650,6 +651,67 @@ function toggleSavePaper(
         applyFiltersToCurrentPapers();
 
     }
+
+
+    showSaveFeedback(
+        willSave,
+        paper.title
+    );
+
+}
+
+
+function showSaveFeedback(
+    wasSaved,
+    title
+) {
+
+    const feedback =
+        document.getElementById("saveFeedback");
+
+
+    if (!feedback) {
+
+        return;
+
+    }
+
+
+    feedback.innerHTML = `
+
+        <span class="save-feedback-icon">
+            ${wasSaved ? "✓" : "−"}
+        </span>
+
+        <span>
+            <strong>
+                ${wasSaved ? "Paper saved" : "Removed from library"}
+            </strong>
+
+            <small>
+                ${wasSaved ? escapeHTML(title) : "Your library is up to date"}
+            </small>
+        </span>
+
+    `;
+
+
+    feedback.classList.remove("visible");
+
+    requestAnimationFrame(function () {
+
+        feedback.classList.add("visible");
+
+    });
+
+
+    clearTimeout(showSaveFeedback.timeout);
+
+    showSaveFeedback.timeout = setTimeout(function () {
+
+        feedback.classList.remove("visible");
+
+    }, 3200);
 
 }
 
