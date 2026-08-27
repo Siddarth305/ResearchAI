@@ -1,6 +1,23 @@
-let savedPapers = JSON.parse(
-    localStorage.getItem("researchAI_savedPapers")
-) || [];
+function loadSavedPapers() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem("researchAI_savedPapers")
+        ) || [];
+
+    }
+
+    catch (error) {
+
+        return [];
+
+    }
+
+}
+
+
+let savedPapers = loadSavedPapers();
 
 
 // Latest search results
@@ -312,6 +329,9 @@ function displayPapers(
     }
 
 
+    savedPapers = loadSavedPapers();
+
+
     container.innerHTML = "";
 
 
@@ -432,7 +452,7 @@ function displayPapers(
             const isSaved =
                 savedPapers.some(
                     saved =>
-                        saved.id === paper.id
+                        String(saved.id) === String(paper.id)
                 );
 
 
@@ -607,7 +627,8 @@ function displayPapers(
                 function () {
 
                     toggleSavePaper(
-                        paper
+                        paper,
+                        this
                     );
 
                 }
@@ -625,13 +646,14 @@ function displayPapers(
 // ======================================================
 
 function toggleSavePaper(
-    paper
+    paper,
+    button
 ) {
 
     const existingIndex =
         savedPapers.findIndex(
             saved =>
-                saved.id === paper.id
+                String(saved.id) === String(paper.id)
         );
 
 
@@ -671,7 +693,10 @@ function toggleSavePaper(
 
     if (currentPapers.length) {
 
-        applyFiltersToCurrentPapers();
+        updateSaveButton(
+            button,
+            willSave
+        );
 
     }
 
@@ -680,6 +705,79 @@ function toggleSavePaper(
         willSave,
         paper.title
     );
+
+}
+
+
+function updateSaveButton(
+    button,
+    isSaved
+) {
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    button.classList.toggle(
+        "saved",
+        isSaved
+    );
+
+    button.setAttribute(
+        "aria-pressed",
+        String(isSaved)
+    );
+
+    button.setAttribute(
+        "aria-label",
+        isSaved
+            ? "Remove paper from library"
+            : "Save paper to library"
+    );
+
+    button.innerHTML = isSaved
+        ? `<span class="save-icon">✓</span><span>SAVED</span>`
+        : `<span class="save-icon">☆</span><span>SAVE PAPER</span>`;
+
+
+    const card =
+        button.closest(".paper-card");
+
+
+    if (!card) {
+
+        return;
+
+    }
+
+
+    const existingBadge =
+        card.querySelector(".paper-saved-badge");
+
+
+    if (isSaved && !existingBadge) {
+
+        const badge =
+            document.createElement("div");
+
+        badge.className =
+            "paper-saved-badge";
+
+        badge.innerHTML =
+            "<span>✓</span> IN YOUR LIBRARY";
+
+        card.prepend(badge);
+
+    }
+
+    else if (!isSaved && existingBadge) {
+
+        existingBadge.remove();
+
+    }
 
 }
 
