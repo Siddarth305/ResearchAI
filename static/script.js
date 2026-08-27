@@ -575,14 +575,9 @@ function displayPapers(
                             save-paper
                             ${isSaved ? "saved" : ""}
                         "
-                        onclick="toggleSavePaper(
-                            ${JSON.stringify(
-                                paper
-                            ).replace(
-                                /"/g,
-                                "&quot;"
-                            )}
-                        )"
+                        type="button"
+                        aria-pressed="${isSaved}"
+                        aria-label="${isSaved ? "Remove paper from library" : "Save paper to library"}"
                     >
 
                         ${
@@ -600,6 +595,22 @@ function displayPapers(
 
             container.appendChild(
                 card
+            );
+
+
+            const saveButton =
+                card.querySelector(".save-paper");
+
+
+            saveButton.addEventListener(
+                "click",
+                function () {
+
+                    toggleSavePaper(
+                        paper
+                    );
+
+                }
             );
 
         }
