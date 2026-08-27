@@ -1215,6 +1215,60 @@ body::after {
 }
 
 
+.paper-saved-badge {
+
+    position: absolute;
+
+    top: 24px;
+
+    right: 24px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 8px;
+
+    border: 1px solid rgba(99,230,190,.35);
+
+    border-radius: 999px;
+
+    background: rgba(99,230,190,.1);
+
+    color: var(--success);
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+}
+
+
+.paper-saved-badge span {
+
+    display: grid;
+
+    width: 14px;
+
+    height: 14px;
+
+    place-items: center;
+
+    border-radius: 50%;
+
+    background: var(--success);
+
+    color: #0b1715;
+
+    font-size: 9px;
+
+}
+
+
 .paper-authors {
 
     margin-top: 8px;
@@ -1387,6 +1441,17 @@ body::after {
     font-family: inherit;
 
     user-select: none;
+
+}
+
+
+.save-icon {
+
+    margin-right: 6px;
+
+    font-size: 15px;
+
+    line-height: 0;
 
 }
 
@@ -2039,6 +2104,17 @@ body::after {
         align-items: flex-start;
 
         flex-direction: column;
+
+    }
+
+
+    .paper-saved-badge {
+
+        position: static;
+
+        width: fit-content;
+
+        margin-top: 12px;
 
     }
 

@@ -447,11 +447,25 @@ function displayPapers(
                 </div>
 
 
+                ${
+                    isSaved
+                        ? `
+                            <div class="paper-saved-badge">
+                                <span>✓</span>
+                                IN YOUR LIBRARY
+                            </div>
+                        `
+                        : ""
+                }
+
+
                 <div class="paper-title">
 
-                    ${escapeHTML(
-                        paper.title
-                    )}
+                    ${
+                        isSaved
+                            ? `<span class="save-icon">✓</span><span>SAVED</span>`
+                            : `<span class="save-icon">☆</span><span>SAVE PAPER</span>`
+                    }
 
                 </div>
 
